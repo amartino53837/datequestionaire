@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Date Game</title>
+  <style>
+    body {
+      background-color: pink;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      color: #333;
+      overflow: hidden; /* Prevent scrollbars */
+      position: relative;
+    }
+
+    .hearts-container {
+      position: absolute;
+      bottom: 0; /* Place at the bottom of the page */
+      left: 0;
+      width: 100%;
+      height: 50%; /* Limit hearts to lower half */
+      z-index: -1; /* Keep hearts behind content */
+      pointer-events: none; /* Make sure hearts don't interfere with clicks */
+    }
+
+    /* Heart shape using CSS */
+    .heart {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: red;
+      transform: rotate(45deg);
+    }
+
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -25px;
+      left: 0;
+    }
+
+    .heart::after {
+      top: 0;
+      left: -25px;
+    }
+
+    h1, p {
+      font-size: 24px;
+    }
+
+    button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: darkred;
+    }
+
+    .failed {
+      color: red;
+      font-size: 30px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts-container">
+    <!-- Hearts dynamically generated via JavaScript -->
+    <script>
+      function generateHearts() {
+        const container = document.querySelector('.hearts-container');
+        let attempts = 0;
+        const maxAttempts = 100; // Prevent infinite loop if too many collisions
+
+        // Create hearts and ensure they don't overlap
+        const hearts = [];
+
+        while (hearts.length < 30 && attempts < maxAttempts) {
+          const heart = document.createElement('div');
+          heart.classList.add('heart');
+          const size = 50; // Set all hearts to the same size
+          const left = Math.random() * 100; // Random horizontal position
+          const top = Math.random() * 50 + 50; // Random vertical position within lower half (50% to 100%)
+
+          // Check for overlap with existing hearts
+          let overlap = false;
+          for (let i = 0; i < hearts.length; i++) {
+            const existingHeart = hearts[i];
+            const distance = Math.sqrt(Math.pow(left - existingHeart.left, 2) + Math.pow(top - existingHeart.top, 2));
+            if (distance < size) {
+              overlap = true;
+              break;
+            }
+          }
+
+          if (!overlap) {
+            heart.style.width = `${size}px`;
+            heart.style.height = `${size}px`;
+            heart.style.left = `${left}%`;
+            heart.style.top = `${top}%`;
+
+            hearts.push({ left, top }); // Keep track of positions
+            container.appendChild(heart);
+          }
+
+          attempts++;
+        }
+      }
+
+      window.onload = generateHearts;
+    </script>
+  </div>
+
+  <!-- Start Page -->
+  <div id="start" class="screen active">
+    <h1>Date Details</h1>
+    <button onclick="chooseOption('favoriteFlowers')">I'll have your favorite flowers</button>
+    <button onclick="chooseOption('emptyHanded')">I'll come empty-handed</button>
+  </div>
+
+  <!-- Failed Page -->
+  <div id="failed" class="screen">
+    <p class="failed">Failed; Try Again</p>
+    <button onclick="restartGame()">Restart</button>
+  </div>
+
+  <!-- Flowers Options -->
+  <div id="flowers" class="screen">
+    <p>What do you want to do next?</p>
+    <button onclick="chooseOption('dinner')">We will have dinner</button>
+    <button onclick="chooseOption('movie')">We will see a movie</button>
+  </div>
+
+  <!-- Dinner Options -->
+  <div id="dinner" class="screen">
+    <p>How will you decide?</p>
+    <button onclick="chooseOption('pickSomewhere')">I'm going to pick somewhere</button>
+    <button onclick="chooseOption('askYou')">I will ask you what you want</button>
+  </div>
+
+  <!-- Movie Options -->
+  <div id="movie" class="screen">
+    <p>What will you do?</p>
+    <button onclick="chooseOption('surpriseMe')">Surprise me?</button>
+    <button onclick="chooseOption('textMe')">Text me what movie?</button>
+  </div>
+
+  <!-- Final Messages -->
+  <div id="pickSomewhere" class="screen">
+    <p>I love you and I can't wait!</p>
+  </div>
+  <div id="askYou" class="screen">
+    <p>I am not saying no, but you better have flowers and not be mad when I say I don't know. What do you want? &lt;3</p>
+  </div>
+  <div id="surpriseMe" class="screen">
+    <p>Text me the plan, cutie ;)</p>
+  </div>
+  <div id="textMe" class="screen">
+    <p>Let me know what we're gonna see, baby.</p>
+  </div>
+
+  <script>
+    function chooseOption(option) {
+      // Hide all screens
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+
+      // Show next screen based on choice
+      if (option === 'favoriteFlowers') {
+        document.getElementById('flowers').classList.add('active');
+      } else if (option === 'emptyHanded') {
+        document.getElementById('failed').classList.add('active');
+        document.querySelector('.failed').style.display = 'block';
+      } else if (option === 'dinner') {
+        document.getElementById('dinner').classList.add('active');
+      } else if (option === 'movie') {
+        document.getElementById('movie').classList.add('active');
+      } else if (option === 'pickSomewhere') {
+        document.getElementById('pickSomewhere').classList.add('active');
+      } else if (option === 'askYou') {
+        document.getElementById('askYou').classList.add('active');
+      } else if (option === 'surpriseMe') {
+        document.getElementById('surpriseMe').classList.add('active');
+      } else if (option === 'textMe') {
+        document.getElementById('textMe').classList.add('active');
+      }
+    }
+
+    function restartGame() {
+      // Reset to start screen
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+      document.getElementById('start').classList.add('active');
+      document.querySelector('.failed').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
